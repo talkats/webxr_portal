@@ -5,39 +5,43 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WebXR Portal</title>
     <script src="https://aframe.io/releases/1.4.1/aframe.min.js"></script>
-    <script src="https://cdn.rawgit.com/jeromeetienne/ar.js/1.7.2/aframe-ar.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/jeromeetienne/ar.js/aframe/build/aframe-ar.min.js"></script>
 </head>
 <body>
-    <a-scene 
+    <!-- AR.js scene -->
+    <a-scene
+        embedded
         vr-mode-ui="enabled: false"
-        arjs="sourceType: webcam; debugUIEnabled: false">
+        arjs="sourceType: webcam; debugUIEnabled: false;">
 
-        <!-- Portal -->
+        <!-- Portal Frame -->
         <a-entity 
             id="portalFrame"
             geometry="primitive: plane; height: 3; width: 2;" 
             material="shader: flat; src: #portalImage;" 
-            position="0 1.5 -5"
-            arjs-anchor="type: fixed;">
+            position="0 1.5 -5">
         </a-entity>
 
-        <!-- Invisible Collider -->
+        <!-- Portal Collider -->
         <a-entity 
             id="portalCollider"
             geometry="primitive: box; height: 3; width: 2; depth: 0.5;"
             position="0 1.5 -5"
             material="opacity: 0; transparent: true;"
-            class="clickable">
+            portal-interaction>
         </a-entity>
 
-        <!-- 360 Image -->
+        <!-- Assets -->
         <a-assets>
             <img id="portalImage" src="2025-01-02 16 09 01.png">
             <img id="skyImage" src="20220512_140701_490.jpg">
         </a-assets>
 
+        <!-- Sky for 360 Environment -->
+        <a-sky id="defaultSky" color="#ECECEC"></a-sky>
+
         <!-- Camera -->
-        <a-camera 
+        <a-camera
             position="0 1.6 0"
             look-controls
             wasd-controls>
@@ -45,25 +49,21 @@
     </a-scene>
 
     <script>
-        // Portal Interaction Logic
+        // Portal Interaction Component
         AFRAME.registerComponent('portal-interaction', {
             init: function () {
-                const portalCollider = document.querySelector('#portalCollider');
-                const sky = document.querySelector('a-sky');
+                const portalCollider = this.el;
+                const sky = document.querySelector('#defaultSky');
                 const skyImage = document.querySelector('#skyImage');
 
                 portalCollider.addEventListener('click', () => {
-                    // Replace the default sky with the 360-degree image
+                    // Change the sky to the 360-degree image
                     sky.setAttribute('src', skyImage.getAttribute('src'));
-
-                    // Optionally hide the portal after transition
+                    // Hide the portal frame
                     document.querySelector('#portalFrame').setAttribute('visible', false);
                 });
             }
         });
-
-        // Attach the portal-interaction component to the portalCollider
-        document.querySelector('#portalCollider').setAttribute('portal-interaction', '');
     </script>
 </body>
 </html>
