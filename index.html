@@ -14,12 +14,24 @@
         vr-mode-ui="enabled: false"
         arjs="sourceType: webcam; debugUIEnabled: false;">
 
+        <!-- Glowing Circle -->
+        <a-entity 
+            id="placementCircle"
+            geometry="primitive: circle; radius: 0.5;"
+            material="color: yellow; opacity: 0.8;"
+            position="0 0 -2"
+            rotation="-90 0 0"
+            visible="true"
+            animation="property: material.opacity; to: 0.4; dir: alternate; loop: true; dur: 1000;">
+        </a-entity>
+
         <!-- Portal Frame -->
         <a-entity 
             id="portalFrame"
             geometry="primitive: plane; height: 3; width: 2;" 
             material="shader: flat; src: #portalImage;" 
-            position="0 1.5 -5">
+            position="0 1.5 -5"
+            visible="false">
         </a-entity>
 
         <!-- Portal Collider -->
@@ -28,12 +40,12 @@
             geometry="primitive: box; height: 3; width: 2; depth: 0.5;"
             position="0 1.5 -5"
             material="opacity: 0; transparent: true;"
+            visible="false"
             portal-interaction>
         </a-entity>
 
         <!-- Assets -->
         <a-assets>
-            <!-- Use proper raw GitHub URLs for images -->
             <img id="portalImage" src="https://github.com/talkats/webxr_portal/blob/20fcbc6cd3515745cbb1aa18da542a284f744008/2025-01-02%2016%2009%2001.png">
             <img id="skyImage" src="https://github.com/talkats/webxr_portal/blob/20fcbc6cd3515745cbb1aa18da542a284f744008/20220512_140701_490.jpg">
         </a-assets>
@@ -50,21 +62,32 @@
     </a-scene>
 
     <script>
-        // Portal Interaction Component
-        AFRAME.registerComponent('portal-interaction', {
+        // Placement Logic
+        AFRAME.registerComponent('placement-handler', {
             init: function () {
-                const portalCollider = this.el;
-                const sky = document.querySelector('#defaultSky');
-                const skyImage = document.querySelector('#skyImage');
+                const placementCircle = document.querySelector('#placementCircle');
+                const portalFrame = document.querySelector('#portalFrame');
+                const portalCollider = document.querySelector('#portalCollider');
 
-                portalCollider.addEventListener('click', () => {
-                    // Change the sky to the 360-degree image
-                    sky.setAttribute('src', skyImage.getAttribute('src'));
-                    // Hide the portal frame
-                    document.querySelector('#portalFrame').setAttribute('visible', false);
+                this.el.sceneEl.addEventListener('click', (event) => {
+                    // Get the position of the glowing circle
+                    const circlePosition = placementCircle.object3D.position;
+
+                    // Move the portal to the circle's position and make it visible
+                    portalFrame.setAttribute('position', `${circlePosition.x} ${circlePosition.y + 1.5} ${circlePosition.z}`);
+                    portalFrame.setAttribute('visible', true);
+
+                    portalCollider.setAttribute('position', `${circlePosition.x} ${circlePosition.y + 1.5} ${circlePosition.z}`);
+                    portalCollider.setAttribute('visible', true);
+
+                    // Hide the glowing circle
+                    placementCircle.setAttribute('visible', false);
                 });
             }
         });
+
+        // Attach the placement-handler to the scene
+        document.querySelector('a-scene').setAttribute('placement-handler', '');
     </script>
 </body>
 </html>
