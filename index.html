@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebXR Portal</title>
+    <script src="https://aframe.io/releases/1.4.1/aframe.min.js"></script>
+</head>
+<body>
+    <a-scene>
+        <!-- Environment -->
+        <a-sky id="defaultSky" color="#ECECEC"></a-sky>
+
+        <!-- Portal -->
+        <a-entity 
+            id="portalFrame"
+            geometry="primitive: plane; height: 3; width: 2;" 
+            material="shader: flat; src: #portalImage;" 
+            position="0 1.5 -5">
+        </a-entity>
+
+        <!-- Invisible Collider -->
+        <a-entity 
+            id="portalCollider"
+            geometry="primitive: box; height: 3; width: 2; depth: 0.5;"
+            position="0 1.5 -4.75"
+            material="opacity: 0; transparent: true;"
+            class="clickable">
+        </a-entity>
+
+        <!-- 360 Image -->
+        <a-assets>
+            <img id="portalImage" src="C:\Users\ASUS\Downloads\20220512_140701_490.jpg">
+            <img id="skyImage" src="my360image.jpg">
+        </a-assets>
+
+        <!-- Camera -->
+        <a-entity 
+            id="camera" 
+            camera 
+            position="0 1.6 0"
+            wasd-controls 
+            look-controls>
+        </a-entity>
+    </a-scene>
+
+    <script>
+        // Portal Interaction Logic
+        AFRAME.registerComponent('portal-interaction', {
+            init: function () {
+                const portalCollider = document.querySelector('#portalCollider');
+                const sky = document.querySelector('#defaultSky');
+                const skyImage = document.querySelector('#skyImage');
+
+                portalCollider.addEventListener('click', () => {
+                    // Replace the default sky with the 360-degree image
+                    sky.setAttribute('src', skyImage.getAttribute('src'));
+
+                    // Optionally hide the portal after transition
+                    document.querySelector('#portalFrame').setAttribute('visible', false);
+                });
+            }
+        });
+
+        // Attach the portal-interaction component to the portalCollider
+        document.querySelector('#portalCollider').setAttribute('portal-interaction', '');
+    </script>
+</body>
+</html>
