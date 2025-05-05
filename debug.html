@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>WebXR Portal – with Floor Hit‑Test</title>
+
+  <!-- A‑Frame (needs >=1.3 for WebXR hit-test) -->
+  <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+
+  <!-- ar-hit-test component (tiny helper) -->
+  <script src="https://cdn.jsdelivr.net/npm/aframe-ar-hit-test@1.0.4/dist/aframe-ar-hit-test.min.js"></script>
+
+  <style>html,body{margin:0;height:100%;overflow:hidden;background:#000}</style>
+</head>
+<body>
+
+  <a-scene
+      vr-mode-ui="enabled:false"
+      renderer="colorManagement:true"
+      xrweb="allowedDevices: any"      <!-- enables WebXR -->
+      embedded>
+
+    <!-- ring that follows the first hit‑test result -->
+    <a-ring id="floorRing"
+            color="#00ccff"
+            radius-inner="0.25"
+            radius-outer="0.3"
+            rotation="-90 0 0"
+            visible="false"
+            ar-hit-test="target:#floorRing; type:plane;">
+    </a-ring>
+
+    <!-- portal frame (plane with image) -->
+    <a-plane id="portalFrame"
+             width="2" height="3"
+             material="shader:flat; src:#portalImage"
+             visible="false">
+    </a-plane>
+
+    <!-- assets -->
+    <a-assets>
+      <img id="portalImage" src="https://i.imgur.com/0Z2QZ5Y.jpeg">
+    </a-assets>
+
+    <!-- camera -->
+    <a-camera look-controls="enabled:false"></a-camera>
+  </a-scene>
+
+  <script>
+  // once the scene is ready
+  AFRAME.scenes[0].addEventListener('loaded', () => {
+    const scene = AFRAME.scenes[0];
+    const ring  = document.getElementById('floorRing');
+    const portal= document.getElementById('portalFrame');
+
+    // when hit‑test gives a position we show the ring
+    ring.addEventListener('ar-hit-test-start', () => { ring.setAttribute('visible', true); });
+
+    // single tap places the portal exactly where the ring is
+    scene.addEventListener('click', () => {
+      if (!ring.object3D.visible) return;          // no surface yet
+      const pos = ring.object3D.position.clone();
+      const rot = ring.object3D.rotation.clone();
+
+      portal.setAttribute('position', pos);
+      portal.setAttribute('rotation', {x:0,y:rot.y * THREE.Math.RAD2DEG,z:0});
+      portal.setAttribute('visible', true);
+
+      // optional: hide ring after placement
+      ring.setAttribute('visible', false);
+    });
+  });
+  </script>
+</body>
+</html>
